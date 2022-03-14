@@ -35,7 +35,7 @@ TrieNode* trie_init(TrieNode* pool, size_t pool_size) {
 }
 
 void trie_add(TrieNode* root, char* prefix, size_t length, TrieNode* pool, size_t pool_size) {
-    if (length == 0) {
+    if (!length) {
         root->payload |= 1;
         return;
     }
@@ -50,10 +50,10 @@ void trie_add(TrieNode* root, char* prefix, size_t length, TrieNode* pool, size_
             pool_size = length;
         }
 
-        TrieNode* node = trie_init(pool, pool_size);
+        cur = trie_init(pool, pool_size);
 
-        GET_CHILDREN(root)[*prefix] = node;
-        trie_add(node, prefix + 1, length - 1, pool + 1, pool_size - 1);
+        GET_CHILDREN(root)[*prefix] = cur;
+        trie_add(cur, prefix + 1, length - 1, pool + 1, pool_size - 1);
     }
 }
 
