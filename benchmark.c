@@ -28,13 +28,13 @@ int main() {
     root = trie_init(NULL, 0);
 
     while(fgets(line, sizeof(line), prefix) != NULL) {
-        trie_add(root, line, strlen(line), NULL, 0);
+        trie_add(root, line, strlen(line) - 1, NULL, 0);
     }
 #else
     root = trie_init();
 
     while(fgets(line, sizeof(line), prefix) != NULL) {
-        trie_add(root, line, strlen(line));
+        trie_add(root, line, strlen(line) - 1);
     }
 #endif
 
