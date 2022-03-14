@@ -1,5 +1,6 @@
 #ifdef TRIE_OPT
 #include <stdlib.h>
+#include <string.h>
 
 #include "trie.h"
 
@@ -16,43 +17,45 @@ struct TrieNode {
 size_t trie_struct_size() { return sizeof(TrieNode); }
 
 
-TrieNode* trie_init(TrieNode* pool, size_t pool_size) {
+TrieNode* trie_init(void* pool, size_t pool_size) {
     TrieNode* node;
     unsigned char need_free;
 
     if (pool_size > 0 && pool) {
         node = pool;
+        memset(pool + sizeof(TrieNode), 0, 255 * sizeof(TrieNode*));
+        node->payload = (unsigned long)(pool + sizeof(TrieNode));
         need_free = 0;
     } else {
         node = malloc(sizeof(TrieNode));
+        node->payload = (unsigned long)calloc(255, sizeof(TrieNode*));
         need_free = 2;
     }
 
-    node->payload = (unsigned long)calloc(256, sizeof(TrieNode*));
     node->payload |= need_free;
 
     return node;
 }
 
-void trie_add(TrieNode* root, char* prefix, size_t length, TrieNode* pool, size_t pool_size) {
+void trie_add(TrieNode* root, char* prefix, size_t length, void* pool, size_t pool_size) {
     if (!length) {
         root->payload |= 1;
         return;
     }
 
-    TrieNode* cur = GET_CHILDREN(root)[*prefix];
+    TrieNode* cur = GET_CHILDREN(root)[(*prefix) - 1];
 
     if (!cur) {
-        if (!pool) {
-            pool = malloc(sizeof(TrieNode) * length);
+        if (!pool || !pool_size) {
+            pool = malloc(sizeof(void*) * length * 256);
             pool_size = length;
         }
 
         cur = trie_init(pool, pool_size);
 
-        GET_CHILDREN(root)[*prefix] = cur;
+        GET_CHILDREN(root)[(*prefix) - 1] = cur;
 
-        ++pool;
+        pool += sizeof(TrieNode) + 255 * sizeof(TrieNode*);
         --pool_size;
     }
 
@@ -62,7 +65,7 @@ void trie_add(TrieNode* root, char* prefix, size_t length, TrieNode* pool, size_
 
 int trie_search(TrieNode* root, char* query, size_t length) {
     while (length && !IS_END(root)) {
-        root = GET_CHILDREN(root)[*query];
+        root = GET_CHILDREN(root)[(*query) - 1];
         if (root) {
             ++query;
             --length;
@@ -78,12 +81,11 @@ void trie_free(TrieNode* node) {
     if (!node) {
         return;
     }
-    for (int i = 0; i < 256; ++i) {
+    for (int i = 0; i < 255; ++i) {
         if (GET_CHILDREN(node)[i]) {
             trie_free(GET_CHILDREN(node)[i]);
         }
     }
-    free(GET_CHILDREN(node));
     if (NEED_FREE(node)) {
         free(node);
     }
