@@ -42,9 +42,7 @@ void trie_add(TrieNode* root, char* prefix, size_t length, TrieNode* pool, size_
 
     TrieNode* cur = GET_CHILDREN(root)[*prefix];
 
-    if (cur) {
-        trie_add(cur, prefix + 1, length - 1, pool, pool_size);
-    } else {
+    if (!cur) {
         if (!pool) {
             pool = malloc(sizeof(TrieNode) * length);
             pool_size = length;
@@ -53,8 +51,12 @@ void trie_add(TrieNode* root, char* prefix, size_t length, TrieNode* pool, size_
         cur = trie_init(pool, pool_size);
 
         GET_CHILDREN(root)[*prefix] = cur;
-        trie_add(cur, prefix + 1, length - 1, pool + 1, pool_size - 1);
+
+        ++pool;
+        --pool_size;
     }
+
+    trie_add(cur, prefix + 1, length - 1, pool, pool_size);
 }
 
 
