@@ -15,15 +15,15 @@ int main() {
 
     root = trie_init();
 
-    // for (int i = 0; i < 4; ++i) {
-    //     trie_add(root, prefix[i], strlen(prefix[i]));
-    // }
+    for (int i = 0; i < 4; ++i) {
+        trie_add(root, prefix[i], strlen(prefix[i]));
+    }
 
-    // assert(trie_search(root, "abced", 5) == 1);
-    // assert(trie_search(root, "ab", 2) == 0);
-    // assert(trie_search(root, "bbbb", 4) == 0);
-    // assert(trie_search(root, "abdehji", 7) == 1);
-    // assert(trie_search(root, "bbbbbbbbbb", 10) == 1);
+    assert(trie_search(root, "abced", 5) == 1);
+    assert(trie_search(root, "ab", 2) == 0);
+    assert(trie_search(root, "bbbb", 4) == 0);
+    assert(trie_search(root, "abdehji", 7) == 1);
+    assert(trie_search(root, "bbbbbbbbbb", 10) == 1);
 
     trie_free(root);
 
