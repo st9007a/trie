@@ -1,7 +1,7 @@
 *.txt
-trie_v1
-trie_v2
-trie_opt
+trie_v1_benchmark
+trie_v2_benchmark
+trie_opt_benchmark
 trie_v1_test
 trie_v2_test
 trie_opt_test

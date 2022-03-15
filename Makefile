@@ -1,17 +1,17 @@
 CFLAGS = -Wall
-EXEC = trie_v1 trie_v2 trie_opt
-TEST = trie_v1_test trie_v2_test trie_opt_test
 
-MAIN = benchmark.c
-TEST_MAIN = test.c
+PREFIX = trie_v1 trie_v2 trie_opt
 
-.PHONY: all clean
+BENCHMARK := $(addsuffix _benchmark, $(PREFIX))
+TEST := $(addsuffix _test, $(PREFIX))
 
-all: $(EXEC) $(TEST)
+.PHONY: all clean run
+
+all: $(BENCHMARK) $(TEST)
 
 
-run: $(EXEC)
-	@for exec in $(EXEC); do \
+run: $(BENCHMARK)
+	@for exec in $(BENCHMARK); do \
 		./$$exec; \
 	done
 
@@ -20,23 +20,11 @@ test: $(TEST)
 		./$$exec; \
 	done
 
-trie_v1: trie_v1.c trie.h
-	gcc $< $(MAIN) -o $@ $(CFLAGS)
+%_benchmark: %.c trie.h
+	gcc $< benchmark.c -o $@ $(CFLAGS)
 
-trie_v2: trie_v2.c trie.h
-	gcc $< $(MAIN) -o $@ $(CFLAGS)
-
-trie_opt: trie_opt.c trie.h
-	gcc $< $(MAIN) -o $@ $(CFLAGS)
-
-trie_v1_test: trie_v1.c trie.h
-	gcc $< $(TEST_MAIN) -o $@ $(CFLAGS)
-
-trie_v2_test: trie_v2.c trie.h
-	gcc $< $(TEST_MAIN) -o $@ $(CFLAGS)
-
-trie_opt_test: trie_opt.c trie.h
-	gcc $< $(TEST_MAIN) -o $@ $(CFLAGS)
+%_test: %.c trie.h
+	gcc $< test.c -o $@ $(CFLAGS)
 
 clean:
-	rm -rf $(EXEC) $(TEST)
+	rm -rf $(BENCHMARK) $(TEST)
