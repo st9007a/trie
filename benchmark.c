@@ -24,19 +24,11 @@ int main() {
         return 1;
     }
 
-#ifdef TRIE_OPT
-    root = trie_init(NULL, 0);
-
-    while(fgets(line, sizeof(line), prefix) != NULL) {
-        trie_add(root, line, strlen(line) - 1, NULL, 0);
-    }
-#else
     root = trie_init();
 
     while(fgets(line, sizeof(line), prefix) != NULL) {
         trie_add(root, line, strlen(line) - 1);
     }
-#endif
 
     fclose(prefix);
 

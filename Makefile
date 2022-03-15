@@ -27,7 +27,7 @@ trie_v2: trie_v2.c trie.h
 	gcc $< $(MAIN) -o $@ $(CFLAGS)
 
 trie_opt: trie_opt.c trie.h
-	gcc $< $(MAIN) -o $@ -DTRIE_OPT $(CFLAGS)
+	gcc $< $(MAIN) -o $@ $(CFLAGS)
 
 trie_v1_test: trie_v1.c trie.h
 	gcc $< $(TEST_MAIN) -o $@ $(CFLAGS)
@@ -36,7 +36,7 @@ trie_v2_test: trie_v2.c trie.h
 	gcc $< $(TEST_MAIN) -o $@ $(CFLAGS)
 
 trie_opt_test: trie_opt.c trie.h
-	gcc $< $(TEST_MAIN) -o $@ -DTRIE_OPT $(CFLAGS)
+	gcc $< $(TEST_MAIN) -o $@ $(CFLAGS)
 
 clean:
 	rm -rf $(EXEC) $(TEST)

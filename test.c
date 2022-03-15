@@ -13,19 +13,11 @@ int main() {
     prefix[2] = "cgh";
     prefix[3] = "bbbbb";
 
-#ifdef TRIE_OPT
-    root = trie_init(NULL, 0);
-
-    for (int i = 0; i < 4; ++i) {
-        trie_add(root, prefix[i], strlen(prefix[i]), NULL, 0);
-    }
-#else
     root = trie_init();
 
     for (int i = 0; i < 4; ++i) {
         trie_add(root, prefix[i], strlen(prefix[i]));
     }
-#endif
 
     assert(trie_search(root, "abced", 5) == 1);
     assert(trie_search(root, "ab", 2) == 0);

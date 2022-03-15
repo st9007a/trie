@@ -1,11 +1,12 @@
-#ifdef TRIE_OPT
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "trie.h"
 
+#define BLOCK_SIZE (256 * sizeof(void*))
 #define GET_CHILDREN(node) ((TrieNode**)((node)->payload & (0xffffffffffffffff << 2)))
-#define IS_END(node) ((node)->payload & 0x1)
+#define IS_END(node) ((node)->payload & 0x01)
 #define NEED_FREE(node) ((node)->payload & 0x10)
 
 
@@ -14,30 +15,21 @@ struct TrieNode {
 };
 
 
-size_t trie_struct_size() { return sizeof(TrieNode); }
-
-
-TrieNode* trie_init(void* pool, size_t pool_size) {
+static TrieNode* trie_init_with_pool(void* pool, size_t pool_size) {
     TrieNode* node;
-    unsigned char need_free;
 
     if (pool_size > 0 && pool) {
         node = pool;
-        memset(pool + sizeof(TrieNode), 0, 255 * sizeof(TrieNode*));
+        memset(pool, 0, BLOCK_SIZE);
         node->payload = (unsigned long)(pool + sizeof(TrieNode));
-        need_free = 0;
     } else {
-        node = malloc(sizeof(TrieNode));
-        node->payload = (unsigned long)calloc(255, sizeof(TrieNode*));
-        need_free = 2;
+        node = trie_init();
     }
-
-    node->payload |= need_free;
 
     return node;
 }
 
-void trie_add(TrieNode* root, char* prefix, size_t length, void* pool, size_t pool_size) {
+static inline void trie_add_with_pool(TrieNode* root, char* prefix, size_t length, void* pool, size_t pool_size) {
     if (!length) {
         root->payload |= 1;
         return;
@@ -47,19 +39,36 @@ void trie_add(TrieNode* root, char* prefix, size_t length, void* pool, size_t po
 
     if (!cur) {
         if (!pool || !pool_size) {
-            pool = malloc(sizeof(void*) * length * 256);
+            pool = malloc(BLOCK_SIZE * length);
             pool_size = length;
         }
 
-        cur = trie_init(pool, pool_size);
+        cur = trie_init_with_pool(pool, pool_size);
 
         GET_CHILDREN(root)[(*prefix) - 1] = cur;
 
-        pool += sizeof(TrieNode) + 255 * sizeof(TrieNode*);
+        pool += BLOCK_SIZE;
         --pool_size;
     }
 
-    trie_add(cur, prefix + 1, length - 1, pool, pool_size);
+    trie_add_with_pool(cur, prefix + 1, length - 1, pool, pool_size);
+
+}
+
+
+size_t trie_struct_size() { return sizeof(TrieNode); }
+
+
+TrieNode* trie_init() {
+    TrieNode* node = malloc(BLOCK_SIZE);
+    memset(node, 0, BLOCK_SIZE);
+    node->payload = (unsigned long)(node + 1) | 0x10;
+
+    return node;
+}
+
+void trie_add(TrieNode* root, char* prefix, size_t length) {
+    trie_add_with_pool(root, prefix, length, NULL, 0);
 }
 
 
@@ -81,14 +90,15 @@ void trie_free(TrieNode* node) {
     if (!node) {
         return;
     }
+    printf("Enter node:\n");
     for (int i = 0; i < 255; ++i) {
         if (GET_CHILDREN(node)[i]) {
+            printf("Access %c\n", i);
             trie_free(GET_CHILDREN(node)[i]);
         }
     }
     if (NEED_FREE(node)) {
+        printf("Free\n");
         free(node);
     }
 }
-
-#endif
